@@ -2034,6 +2034,69 @@ document.addEventListener('keydown',e=>{
     if(document.getElementById('book-detail').classList.contains('active')){closeBook();return;}
   }
 });
+
+/* ===== GRIMOIRE ENHANCEMENTS ===== */
+const PREMIUM_PRICE = 6.99;
+
+function generateGlobalBooks(startId=1000,count=1000){
+ const countries=[
+  ["Ireland","Europe"],["Portugal","Europe"],["Spain","Europe"],["France","Europe"],
+  ["Germany","Europe"],["Italy","Europe"],["Greece","Europe"],["Japan","Asia"],
+  ["South Korea","Asia"],["India","Asia"],["China","Asia"],["Brazil","South America"],
+  ["Argentina","South America"],["Mexico","North America"],["Nigeria","Africa"],
+  ["South Africa","Africa"],["United Kingdom","Europe"],["United States","North America"]
+ ];
+ const genres=["Fantasy","Romantasy","Dark Romance","Mythology","Adventure","Historical Fantasy","Fae","Academy"];
+ const books=[];
+ for(let i=0;i<count;i++){
+   const c=countries[i%countries.length];
+   books.push({
+      id:startId+i,
+      title:`World Collection Book ${startId+i}`,
+      author:`Author ${startId+i}`,
+      year:2000+(i%26),
+      pages:250+(i%500),
+      rating:4 + Math.random(),
+      country:c[0],
+      region:c[1],
+      genres:[genres[i%genres.length]],
+      themes:["found-family","adventure"],
+      synopsis:"A globally inspired story tailored for recommendation discovery.",
+      cover:"https://via.placeholder.com/400x600?text=Grimoire+Book",
+      theories:[],
+      comments:[],
+      playlist:{
+        spotifyImage:"https://via.placeholder.com/300x300?text=Spotify+Playlist",
+        spotifyLink:"https://open.spotify.com/"
+      }
+   });
+ }
+ return books;
+}
+
+if(typeof ALL_BOOKS !== "undefined"){
+ ALL_BOOKS.push(...generateGlobalBooks());
+}
+
+function scoreBook(book,userPrefs={genres:[],themes:[]}){
+ let score=0;
+ (userPrefs.genres||[]).forEach(g=>{ if(book.genres?.includes(g)) score+=30; });
+ (userPrefs.themes||[]).forEach(t=>{ if(book.themes?.includes(t)) score+=20; });
+ score += (book.rating||0)*5;
+ return score;
+}
+
+window.GRIMOIRE_PREMIUM={
+ price:PREMIUM_PRICE,
+ features:[
+  "Fanart Gallery",
+  "Fan Theories",
+  "Weekly Recommendation Emails",
+  "Monthly Newsletter",
+  "Unlimited Recommendation Refreshes"
+ ]
+};
+
 </script>
 </body>
 </html>
