@@ -1,0 +1,2039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grimoire — Find Your Next Obsession</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0810;
+    --void: #06040d;
+    --mist: #1a1525;
+    --shadow: #251e35;
+    --dusk: #3d3255;
+    --ember: #c8842a;
+    --flame: #e8a045;
+    --gold: #f0c060;
+    --rune: #9b7fd4;
+    --arcane: #7b5bb5;
+    --wisp: #cbbee8;
+    --pale: #e8e0f0;
+    --fade: rgba(203,190,232,0.12);
+    --glow: rgba(200,132,42,0.18);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--void);
+    color:var(--pale);
+    font-family:'EB Garamond',serif;
+    font-size:18px;
+    line-height:1.6;
+    overflow-x:hidden;
+    cursor:default;
+  }
+  /* CUSTOM CURSOR */
+  .cursor{
+    position:fixed;width:12px;height:12px;
+    background:var(--ember);border-radius:50%;
+    pointer-events:none;z-index:9999;
+    transform:translate(-50%,-50%);
+    transition:transform 0.1s,opacity 0.3s;
+    mix-blend-mode:difference;
+  }
+  .cursor-ring{
+    position:fixed;width:36px;height:36px;
+    border:1px solid rgba(200,132,42,0.5);
+    border-radius:50%;pointer-events:none;z-index:9998;
+    transform:translate(-50%,-50%);
+    transition:all 0.15s ease;
+  }
+
+  /* NOISE OVERLAY */
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:1000;opacity:0.4;
+  }
+
+  /* PAGE SYSTEM */
+  .page{display:none;min-height:100vh;position:relative;}
+  .page.active{display:block;}
+  
+  /* ── NAVIGATION ── */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:500;
+    padding:18px 48px;
+    display:flex;align-items:center;justify-content:space-between;
+    background:linear-gradient(to bottom,rgba(6,4,13,0.95) 0%,transparent 100%);
+    backdrop-filter:blur(2px);
+  }
+  .nav-logo{
+    font-family:'Cinzel Decorative',serif;
+    font-size:1.5rem;color:var(--ember);
+    text-shadow:0 0 30px rgba(200,132,42,0.5);
+    cursor:pointer;letter-spacing:0.05em;
+  }
+  .nav-links{display:flex;gap:32px;align-items:center;}
+  .nav-link{
+    font-family:'Cinzel',serif;font-size:0.78rem;
+    letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--wisp);opacity:0.7;
+    cursor:pointer;transition:all 0.3s;
+    text-decoration:none;
+  }
+  .nav-link:hover{opacity:1;color:var(--flame);text-shadow:0 0 12px rgba(232,160,69,0.4);}
+  .nav-btn{
+    font-family:'Cinzel',serif;font-size:0.75rem;
+    letter-spacing:0.1em;text-transform:uppercase;
+    background:transparent;
+    border:1px solid var(--ember);
+    color:var(--flame);
+    padding:8px 20px;cursor:pointer;
+    transition:all 0.3s;
+  }
+  .nav-btn:hover{background:var(--ember);color:var(--ink);}
+
+  /* ── HOMEPAGE ── */
+  #home{
+    background:var(--void);
+    overflow:hidden;
+  }
+  .hero{
+    min-height:100vh;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    position:relative;
+    padding:120px 48px 80px;
+    text-align:center;
+  }
+  /* Animated star field */
+  .stars{position:absolute;inset:0;overflow:hidden;}
+  .star{
+    position:absolute;background:#fff;border-radius:50%;
+    animation:twinkle var(--d,3s) ease-in-out infinite;
+  }
+  @keyframes twinkle{0%,100%{opacity:0.1;transform:scale(1)}50%{opacity:0.8;transform:scale(1.3)}}
+
+  /* Floating orbs */
+  .orb{
+    position:absolute;border-radius:50%;
+    filter:blur(80px);pointer-events:none;
+    animation:drift var(--d,20s) ease-in-out infinite alternate;
+  }
+  @keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(var(--tx,30px),var(--ty,-20px)) scale(1.1)}}
+  
+  .hero-eyebrow{
+    font-family:'Cinzel',serif;font-size:0.72rem;
+    letter-spacing:0.25em;text-transform:uppercase;
+    color:var(--ember);margin-bottom:24px;
+    opacity:0;animation:fadeUp 1s 0.3s forwards;
+  }
+  .hero-title{
+    font-family:'Cinzel Decorative',serif;
+    font-size:clamp(3rem,7vw,6.5rem);
+    line-height:1.05;
+    color:var(--pale);
+    text-shadow:0 0 80px rgba(155,127,212,0.3),0 4px 30px rgba(0,0,0,0.5);
+    margin-bottom:24px;
+    opacity:0;animation:fadeUp 1s 0.5s forwards;
+  }
+  .hero-title span{color:var(--ember);}
+  .hero-sub{
+    font-family:'EB Garamond',serif;font-style:italic;
+    font-size:1.3rem;color:var(--wisp);opacity:0.8;
+    max-width:520px;margin:0 auto 48px;
+    opacity:0;animation:fadeUp 1s 0.7s forwards;
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  
+  .hero-cta-group{
+    display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
+    opacity:0;animation:fadeUp 1s 0.9s forwards;
+  }
+  .btn-primary{
+    font-family:'Cinzel',serif;font-size:0.8rem;
+    letter-spacing:0.12em;text-transform:uppercase;
+    background:var(--ember);color:var(--ink);
+    border:none;padding:14px 36px;cursor:pointer;
+    transition:all 0.3s;
+    box-shadow:0 0 30px rgba(200,132,42,0.3);
+    clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);
+  }
+  .btn-primary:hover{background:var(--flame);box-shadow:0 0 50px rgba(200,132,42,0.5);transform:translateY(-2px);}
+  .btn-secondary{
+    font-family:'Cinzel',serif;font-size:0.8rem;
+    letter-spacing:0.12em;text-transform:uppercase;
+    background:transparent;color:var(--wisp);
+    border:1px solid rgba(203,190,232,0.3);
+    padding:14px 36px;cursor:pointer;
+    transition:all 0.3s;
+  }
+  .btn-secondary:hover{border-color:var(--rune);color:var(--pale);background:rgba(155,127,212,0.08);}
+
+  /* Scroll indicator */
+  .scroll-ind{
+    position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    opacity:0;animation:fadeIn 1s 1.5s forwards;
+  }
+  @keyframes fadeIn{to{opacity:0.5}}
+  .scroll-ind span{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--wisp);}
+  .scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,var(--ember),transparent);animation:scrollPulse 2s ease-in-out infinite;}
+  @keyframes scrollPulse{0%,100%{opacity:0.3;transform:scaleY(0.8)}50%{opacity:1;transform:scaleY(1)}}
+
+  /* Featured books marquee */
+  .marquee-section{
+    padding:40px 0;
+    border-top:1px solid rgba(203,190,232,0.06);
+    border-bottom:1px solid rgba(203,190,232,0.06);
+    overflow:hidden;
+    background:rgba(37,30,53,0.4);
+  }
+  .marquee-track{
+    display:flex;gap:60px;width:max-content;
+    animation:marquee 30s linear infinite;
+  }
+  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .marquee-item{
+    font-family:'Cinzel',serif;font-size:0.75rem;
+    letter-spacing:0.15em;text-transform:uppercase;
+    color:var(--wisp);opacity:0.5;
+    white-space:nowrap;
+    display:flex;align-items:center;gap:20px;
+  }
+  .marquee-item::after{content:'✦';color:var(--ember);opacity:0.8;}
+
+  /* Trending section */
+  .section{padding:80px 48px;}
+  .section-header{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin-bottom:40px;
+    border-bottom:1px solid rgba(203,190,232,0.08);
+    padding-bottom:20px;
+  }
+  .section-title{
+    font-family:'Cinzel',serif;font-size:1.1rem;
+    letter-spacing:0.15em;text-transform:uppercase;
+    color:var(--pale);
+  }
+  .section-title span{color:var(--ember);}
+  .see-all{
+    font-family:'DM Sans',sans-serif;font-size:0.8rem;
+    color:var(--ember);cursor:pointer;opacity:0.8;
+    transition:opacity 0.2s;text-decoration:none;
+  }
+  .see-all:hover{opacity:1;}
+
+  /* Book grid */
+  .book-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:24px;
+  }
+  .book-card{
+    cursor:pointer;
+    position:relative;
+    transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .book-card:hover{transform:translateY(-8px);}
+  .book-cover{
+    width:100%;aspect-ratio:2/3;
+    object-fit:cover;
+    border-radius:2px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.5);
+    transition:box-shadow 0.4s;
+    background:var(--shadow);
+    position:relative;overflow:hidden;
+  }
+  .book-card:hover .book-cover{box-shadow:0 16px 50px rgba(0,0,0,0.7),0 0 20px var(--glow);}
+  .book-cover-img{
+    width:100%;height:100%;object-fit:cover;
+    display:block;
+    transition:transform 0.4s;
+  }
+  .book-card:hover .book-cover-img{transform:scale(1.04);}
+  .book-cover-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(to top,rgba(6,4,13,0.9) 0%,transparent 50%);
+    opacity:0;transition:opacity 0.3s;
+    display:flex;align-items:flex-end;padding:12px;
+  }
+  .book-card:hover .book-cover-overlay{opacity:1;}
+  .cover-view-btn{
+    font-family:'Cinzel',serif;font-size:0.65rem;
+    letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--flame);border:1px solid var(--ember);
+    background:rgba(6,4,13,0.7);padding:6px 14px;
+    cursor:pointer;width:100%;text-align:center;
+    backdrop-filter:blur(4px);
+  }
+  .book-info{margin-top:10px;}
+  .book-title-sm{
+    font-family:'EB Garamond',serif;font-size:0.95rem;
+    color:var(--pale);line-height:1.3;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .book-author-sm{
+    font-family:'DM Sans',sans-serif;font-size:0.75rem;
+    color:var(--wisp);opacity:0.6;margin-top:3px;
+  }
+  .book-rating-sm{
+    display:flex;align-items:center;gap:4px;
+    margin-top:5px;
+  }
+  .star-sm{color:var(--ember);font-size:0.7rem;}
+  .rating-val{font-family:'DM Sans',sans-serif;font-size:0.72rem;color:var(--wisp);opacity:0.7;}
+
+  /* Genres */
+  .genre-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+    gap:16px;
+  }
+  .genre-pill{
+    padding:16px 20px;
+    border:1px solid rgba(203,190,232,0.1);
+    background:rgba(37,30,53,0.3);
+    text-align:center;cursor:pointer;
+    transition:all 0.3s;
+    position:relative;overflow:hidden;
+  }
+  .genre-pill::before{
+    content:'';position:absolute;inset:0;
+    background:var(--gradient,linear-gradient(135deg,var(--ember),var(--arcane)));
+    opacity:0;transition:opacity 0.3s;
+  }
+  .genre-pill:hover::before{opacity:0.15;}
+  .genre-pill:hover{border-color:var(--ember);transform:translateY(-3px);}
+  .genre-icon{font-size:1.5rem;margin-bottom:6px;}
+  .genre-name{
+    font-family:'Cinzel',serif;font-size:0.72rem;
+    letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--wisp);position:relative;
+  }
+
+  /* ── QUIZ / PREFERENCES FORM ── */
+  #quiz{
+    background:radial-gradient(ellipse at 20% 50%,rgba(61,50,85,0.4) 0%,var(--void) 60%);
+    padding-top:100px;
+  }
+  .quiz-container{max-width:800px;margin:0 auto;padding:60px 48px;}
+  .quiz-header{text-align:center;margin-bottom:60px;}
+  .quiz-step-indicator{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin-bottom:32px;
+  }
+  .step-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:rgba(203,190,232,0.2);
+    transition:all 0.3s;
+  }
+  .step-dot.active{background:var(--ember);box-shadow:0 0 10px var(--ember);}
+  .step-dot.done{background:var(--arcane);}
+  .quiz-title{
+    font-family:'Cinzel Decorative',serif;font-size:2.2rem;
+    color:var(--pale);margin-bottom:12px;
+  }
+  .quiz-subtitle{
+    font-family:'EB Garamond',serif;font-style:italic;
+    font-size:1.1rem;color:var(--wisp);opacity:0.7;
+  }
+  .form-step{display:none;}
+  .form-step.active{display:block;animation:fadeUp 0.5s ease;}
+
+  .form-group{margin-bottom:32px;}
+  .form-label{
+    font-family:'Cinzel',serif;font-size:0.78rem;
+    letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--wisp);margin-bottom:12px;display:block;
+  }
+  .form-input,.form-textarea{
+    width:100%;background:rgba(37,30,53,0.5);
+    border:1px solid rgba(203,190,232,0.15);
+    color:var(--pale);padding:14px 18px;
+    font-family:'EB Garamond',serif;font-size:1rem;
+    outline:none;transition:all 0.3s;
+    resize:vertical;
+  }
+  .form-input:focus,.form-textarea:focus{
+    border-color:var(--ember);
+    box-shadow:0 0 0 3px rgba(200,132,42,0.1);
+    background:rgba(37,30,53,0.8);
+  }
+  .form-textarea{min-height:100px;}
+
+  /* Tag select */
+  .tag-grid{display:flex;flex-wrap:wrap;gap:10px;}
+  .tag-option{
+    font-family:'Cinzel',serif;font-size:0.7rem;
+    letter-spacing:0.1em;text-transform:uppercase;
+    border:1px solid rgba(203,190,232,0.2);
+    color:var(--wisp);padding:8px 16px;
+    cursor:pointer;transition:all 0.3s;
+    user-select:none;
+  }
+  .tag-option.selected{
+    border-color:var(--ember);color:var(--flame);
+    background:rgba(200,132,42,0.12);
+    box-shadow:0 0 10px rgba(200,132,42,0.15);
+  }
+  .tag-option:hover:not(.selected){border-color:rgba(203,190,232,0.4);color:var(--pale);}
+
+  /* Range slider */
+  .range-group{position:relative;}
+  input[type=range]{
+    width:100%;-webkit-appearance:none;
+    height:2px;background:rgba(203,190,232,0.15);
+    outline:none;margin:16px 0 8px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:20px;height:20px;border-radius:50%;
+    background:var(--ember);cursor:pointer;
+    box-shadow:0 0 10px rgba(200,132,42,0.4);
+  }
+  .range-labels{display:flex;justify-content:space-between;}
+  .range-label{font-family:'DM Sans',sans-serif;font-size:0.72rem;color:var(--wisp);opacity:0.6;}
+
+  .form-nav{display:flex;justify-content:space-between;align-items:center;margin-top:48px;}
+  .progress-bar{
+    height:2px;background:rgba(203,190,232,0.1);
+    margin-bottom:48px;position:relative;overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;background:linear-gradient(to right,var(--arcane),var(--ember));
+    transition:width 0.5s ease;
+  }
+
+  /* ── RECOMMENDATIONS PAGE ── */
+  #recommendations{
+    background:var(--void);padding-top:100px;
+  }
+  .recs-header{
+    text-align:center;padding:60px 48px 20px;
+  }
+  .recs-title{
+    font-family:'Cinzel Decorative',serif;font-size:2.5rem;
+    color:var(--pale);margin-bottom:12px;
+  }
+  .recs-subtitle{
+    font-family:'EB Garamond',serif;font-style:italic;
+    font-size:1.2rem;color:var(--wisp);opacity:0.7;
+  }
+  .recs-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:32px;
+    padding:40px 48px 80px;
+    max-width:1400px;margin:0 auto;
+  }
+  .rec-card{
+    cursor:pointer;position:relative;
+    animation:fadeUp 0.6s var(--delay,0s) both;
+  }
+  .rec-card:hover .book-cover{transform:translateY(-6px);}
+  .rec-match{
+    position:absolute;top:12px;right:12px;
+    background:var(--ember);color:var(--ink);
+    font-family:'Cinzel',serif;font-size:0.62rem;
+    letter-spacing:0.1em;text-transform:uppercase;
+    padding:4px 10px;z-index:2;
+  }
+  .rec-cover{
+    width:100%;aspect-ratio:2/3;object-fit:cover;
+    box-shadow:0 8px 30px rgba(0,0,0,0.6);
+    transition:all 0.4s;
+    display:block;background:var(--shadow);
+  }
+  .rec-card:hover .rec-cover{
+    box-shadow:0 20px 60px rgba(0,0,0,0.8),0 0 30px rgba(200,132,42,0.2);
+  }
+  .rec-info{margin-top:14px;}
+  .rec-why{
+    font-family:'DM Sans',sans-serif;font-size:0.75rem;
+    color:var(--ember);margin-top:6px;opacity:0.9;
+    font-style:italic;
+  }
+
+  /* ── BOOK DETAIL PAGE ── */
+  #book-detail{
+    position:fixed;inset:0;z-index:800;
+    display:none;overflow-y:auto;
+  }
+  #book-detail.active{display:block;}
+  .book-bg{
+    position:fixed;inset:0;z-index:-1;
+    transition:all 1s ease;
+  }
+  .book-bg-layer1{
+    position:absolute;inset:0;
+    background-size:cover;background-position:center;
+    filter:blur(0px) brightness(0.3);
+  }
+  .book-bg-layer2{
+    position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% 0%,rgba(37,30,53,0.4) 0%,rgba(6,4,13,0.92) 70%);
+  }
+  /* Particle canvas for book themes */
+  #book-particles{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+  }
+  .book-detail-content{
+    position:relative;z-index:2;
+    padding:100px 60px 80px;
+    max-width:1100px;margin:0 auto;
+  }
+  .back-btn{
+    display:flex;align-items:center;gap:8px;
+    font-family:'Cinzel',serif;font-size:0.72rem;
+    letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--wisp);opacity:0.7;cursor:pointer;
+    margin-bottom:48px;transition:all 0.2s;
+    background:none;border:none;
+  }
+  .back-btn:hover{opacity:1;color:var(--flame);}
+
+  .book-hero{
+    display:grid;grid-template-columns:280px 1fr;
+    gap:60px;margin-bottom:60px;align-items:start;
+  }
+  .book-cover-large{
+    box-shadow:0 20px 80px rgba(0,0,0,0.8),0 0 40px rgba(200,132,42,0.15);
+    border-radius:2px;overflow:hidden;
+  }
+  .book-cover-large img{width:100%;display:block;}
+  .book-meta h1{
+    font-family:'Cinzel Decorative',serif;font-size:2.6rem;
+    color:var(--pale);line-height:1.1;margin-bottom:10px;
+  }
+  .book-meta .author-name{
+    font-family:'EB Garamond',serif;font-style:italic;
+    font-size:1.3rem;color:var(--wisp);margin-bottom:20px;
+  }
+  .book-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+  .book-tag{
+    font-family:'Cinzel',serif;font-size:0.65rem;
+    letter-spacing:0.1em;text-transform:uppercase;
+    border:1px solid rgba(203,190,232,0.2);
+    color:var(--wisp);padding:5px 12px;
+  }
+  .book-synopsis{
+    font-size:1.1rem;line-height:1.8;
+    color:rgba(232,224,240,0.85);
+    margin-bottom:32px;
+  }
+
+  /* Star rating widget */
+  .rating-widget{
+    background:rgba(37,30,53,0.5);
+    border:1px solid rgba(203,190,232,0.1);
+    padding:24px;margin-bottom:40px;
+    backdrop-filter:blur(8px);
+  }
+  .rating-title{
+    font-family:'Cinzel',serif;font-size:0.78rem;
+    letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--wisp);margin-bottom:16px;
+  }
+  .stars-row{display:flex;gap:6px;margin-bottom:16px;cursor:pointer;}
+  .star-btn{font-size:1.6rem;color:rgba(203,190,232,0.2);transition:all 0.2s;cursor:pointer;}
+  .star-btn.active,.star-btn.hover{color:var(--ember);text-shadow:0 0 10px rgba(200,132,42,0.5);}
+  .status-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .status-btn{
+    font-family:'Cinzel',serif;font-size:0.68rem;
+    letter-spacing:0.08em;text-transform:uppercase;
+    border:1px solid rgba(203,190,232,0.15);
+    color:var(--wisp);padding:8px 16px;cursor:pointer;
+    transition:all 0.2s;background:transparent;
+  }
+  .status-btn.active{border-color:var(--arcane);color:var(--rune);background:rgba(123,91,181,0.12);}
+  .status-btn:hover:not(.active){border-color:rgba(203,190,232,0.3);}
+
+  /* Tabs */
+  .detail-tabs{
+    display:flex;gap:0;
+    border-bottom:1px solid rgba(203,190,232,0.1);
+    margin-bottom:40px;
+  }
+  .tab-btn{
+    font-family:'Cinzel',serif;font-size:0.72rem;
+    letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--wisp);opacity:0.5;
+    padding:14px 24px;cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:all 0.3s;background:none;border-left:none;border-right:none;border-top:none;
+    border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{opacity:1;color:var(--flame);border-bottom-color:var(--ember);}
+  .tab-btn:hover:not(.active){opacity:0.8;}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;animation:fadeUp 0.4s ease;}
+
+  /* Playlist */
+  .playlist{background:rgba(37,30,53,0.4);border:1px solid rgba(203,190,232,0.08);padding:24px;}
+  .playlist-header{
+    display:flex;align-items:center;gap:12px;
+    margin-bottom:20px;
+  }
+  .spotify-icon{
+    width:32px;height:32px;background:#1DB954;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1rem;flex-shrink:0;
+  }
+  .playlist-name{
+    font-family:'Cinzel',serif;font-size:0.85rem;
+    letter-spacing:0.1em;color:var(--pale);
+  }
+  .track-list{display:flex;flex-direction:column;gap:2px;}
+  .track{
+    display:flex;align-items:center;gap:16px;
+    padding:10px 12px;transition:background 0.2s;cursor:pointer;
+  }
+  .track:hover{background:rgba(203,190,232,0.05);}
+  .track-num{
+    font-family:'DM Sans',sans-serif;font-size:0.75rem;
+    color:var(--wisp);opacity:0.4;width:20px;text-align:center;
+  }
+  .track-art{
+    width:38px;height:38px;background:var(--dusk);
+    flex-shrink:0;overflow:hidden;
+  }
+  .track-art img{width:100%;height:100%;object-fit:cover;}
+  .track-info{flex:1;}
+  .track-title{font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--pale);}
+  .track-artist{font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--wisp);opacity:0.6;}
+  .track-duration{font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--wisp);opacity:0.4;}
+  .play-icon{
+    width:30px;height:30px;border:1px solid rgba(203,190,232,0.2);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:0.7rem;color:var(--ember);flex-shrink:0;transition:all 0.2s;
+  }
+  .track:hover .play-icon{background:var(--ember);color:var(--ink);border-color:var(--ember);}
+
+  /* Fanart */
+  .fanart-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  }
+  .fanart-item{
+    aspect-ratio:1;overflow:hidden;cursor:pointer;
+    position:relative;
+  }
+  .fanart-item img{
+    width:100%;height:100%;object-fit:cover;
+    transition:transform 0.4s;
+    background:var(--shadow);
+  }
+  .fanart-item:hover img{transform:scale(1.06);}
+  .fanart-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(to top,rgba(6,4,13,0.8),transparent);
+    opacity:0;transition:opacity 0.3s;
+    display:flex;align-items:flex-end;padding:12px;
+  }
+  .fanart-item:hover .fanart-overlay{opacity:1;}
+  .fanart-credit{font-family:'DM Sans',sans-serif;font-size:0.72rem;color:var(--wisp);}
+
+  /* Comments */
+  .comments-section{margin-top:20px;}
+  .comment-form{margin-bottom:32px;}
+  .comment-input{
+    width:100%;background:rgba(37,30,53,0.5);
+    border:1px solid rgba(203,190,232,0.15);
+    color:var(--pale);padding:16px;
+    font-family:'EB Garamond',serif;font-size:1rem;
+    outline:none;resize:none;min-height:80px;
+    transition:border-color 0.3s;
+  }
+  .comment-input:focus{border-color:var(--ember);}
+  .comment-submit{
+    font-family:'Cinzel',serif;font-size:0.72rem;
+    letter-spacing:0.1em;text-transform:uppercase;
+    background:var(--ember);color:var(--ink);
+    border:none;padding:10px 24px;cursor:pointer;
+    margin-top:8px;transition:all 0.2s;
+  }
+  .comment-submit:hover{background:var(--flame);}
+  .comment-list{display:flex;flex-direction:column;gap:20px;}
+  .comment{
+    background:rgba(37,30,53,0.3);
+    border:1px solid rgba(203,190,232,0.07);
+    padding:20px;
+  }
+  .comment-header{
+    display:flex;align-items:center;gap:12px;margin-bottom:10px;
+  }
+  .comment-avatar{
+    width:36px;height:36px;border-radius:50%;
+    background:var(--arcane);display:flex;align-items:center;justify-content:center;
+    font-family:'Cinzel',serif;font-size:0.8rem;color:var(--pale);flex-shrink:0;
+  }
+  .comment-user{font-family:'Cinzel',serif;font-size:0.8rem;color:var(--wisp);}
+  .comment-date{font-family:'DM Sans',sans-serif;font-size:0.72rem;color:var(--wisp);opacity:0.4;}
+  .comment-stars{color:var(--ember);font-size:0.75rem;}
+  .comment-body{font-size:0.95rem;line-height:1.7;color:rgba(232,224,240,0.8);}
+
+  /* ── AI CHAT ── */
+  #ai-chat{
+    position:fixed;bottom:24px;right:24px;z-index:700;
+  }
+  .chat-bubble{
+    width:56px;height:56px;border-radius:50%;
+    background:linear-gradient(135deg,var(--arcane),var(--ember));
+    border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.4rem;
+    box-shadow:0 8px 30px rgba(123,91,181,0.4);
+    transition:transform 0.3s,box-shadow 0.3s;
+    animation:pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{box-shadow:0 8px 30px rgba(123,91,181,0.4)}50%{box-shadow:0 8px 40px rgba(200,132,42,0.5),0 0 0 8px rgba(123,91,181,0.1)}}
+  .chat-bubble:hover{transform:scale(1.1);box-shadow:0 12px 40px rgba(123,91,181,0.6);}
+  .chat-window{
+    position:absolute;bottom:70px;right:0;
+    width:360px;height:500px;
+    background:rgba(16,11,26,0.97);
+    border:1px solid rgba(203,190,232,0.12);
+    backdrop-filter:blur(20px);
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    box-shadow:0 -8px 60px rgba(0,0,0,0.6);
+    transform-origin:bottom right;
+    transform:scale(0);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .chat-window.open{transform:scale(1);}
+  .chat-header{
+    padding:16px 20px;
+    background:rgba(37,30,53,0.5);
+    border-bottom:1px solid rgba(203,190,232,0.08);
+    display:flex;align-items:center;gap:10px;
+  }
+  .chat-header-icon{font-size:1.2rem;}
+  .chat-header-title{
+    font-family:'Cinzel',serif;font-size:0.8rem;
+    letter-spacing:0.1em;color:var(--pale);flex:1;
+  }
+  .chat-header-sub{font-family:'DM Sans',sans-serif;font-size:0.7rem;color:var(--ember);}
+  .chat-close{
+    background:none;border:none;color:var(--wisp);
+    cursor:pointer;font-size:1rem;opacity:0.6;
+    transition:opacity 0.2s;
+  }
+  .chat-close:hover{opacity:1;}
+  .chat-messages{
+    flex:1;overflow-y:auto;padding:16px;
+    display:flex;flex-direction:column;gap:12px;
+    scrollbar-width:thin;scrollbar-color:var(--shadow) transparent;
+  }
+  .chat-msg{
+    max-width:85%;padding:10px 14px;
+    font-family:'EB Garamond',serif;font-size:0.9rem;
+    line-height:1.5;
+  }
+  .chat-msg.ai{
+    background:rgba(37,30,53,0.6);
+    border:1px solid rgba(203,190,232,0.08);
+    align-self:flex-start;color:var(--pale);
+  }
+  .chat-msg.user{
+    background:rgba(200,132,42,0.15);
+    border:1px solid rgba(200,132,42,0.2);
+    align-self:flex-end;color:var(--flame);
+  }
+  .chat-msg.typing{
+    background:rgba(37,30,53,0.6);
+    border:1px solid rgba(203,190,232,0.08);
+    align-self:flex-start;
+    display:flex;gap:4px;align-items:center;padding:14px;
+  }
+  .typing-dot{
+    width:6px;height:6px;background:var(--wisp);border-radius:50%;
+    animation:typingBounce 1.2s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2){animation-delay:0.2s;}
+  .typing-dot:nth-child(3){animation-delay:0.4s;}
+  @keyframes typingBounce{0%,100%{transform:translateY(0);opacity:0.4}50%{transform:translateY(-4px);opacity:1}}
+  .chat-input-area{
+    padding:12px;
+    border-top:1px solid rgba(203,190,232,0.08);
+    display:flex;gap:8px;
+  }
+  .chat-input{
+    flex:1;background:rgba(37,30,53,0.6);
+    border:1px solid rgba(203,190,232,0.12);
+    color:var(--pale);padding:10px 14px;
+    font-family:'EB Garamond',serif;font-size:0.9rem;
+    outline:none;resize:none;min-height:40px;max-height:100px;
+    transition:border-color 0.2s;
+  }
+  .chat-input:focus{border-color:var(--ember);}
+  .chat-send{
+    background:var(--ember);border:none;
+    color:var(--ink);padding:10px 16px;
+    cursor:pointer;transition:background 0.2s;
+    font-size:1rem;align-self:flex-end;
+  }
+  .chat-send:hover{background:var(--flame);}
+
+  /* Lightbox */
+  .lightbox{
+    position:fixed;inset:0;z-index:900;
+    background:rgba(6,4,13,0.95);
+    display:none;align-items:center;justify-content:center;
+    backdrop-filter:blur(10px);
+  }
+  .lightbox.open{display:flex;}
+  .lightbox img{max-width:85vw;max-height:85vh;object-fit:contain;}
+  .lightbox-close{
+    position:absolute;top:24px;right:24px;
+    background:none;border:none;color:var(--pale);
+    font-size:2rem;cursor:pointer;opacity:0.7;
+    transition:opacity 0.2s;
+  }
+  .lightbox-close:hover{opacity:1;}
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:rgba(37,30,53,0.95);border:1px solid var(--ember);
+    color:var(--flame);
+    font-family:'Cinzel',serif;font-size:0.75rem;
+    letter-spacing:0.1em;text-transform:uppercase;
+    padding:12px 24px;z-index:950;
+    opacity:0;transition:all 0.3s;pointer-events:none;
+    backdrop-filter:blur(10px);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Divider */
+  .divider{
+    height:1px;background:linear-gradient(to right,transparent,rgba(203,190,232,0.1),transparent);
+    margin:40px 0;
+  }
+
+  /* Responsive */
+  @media(max-width:768px){
+    nav{padding:16px 24px;}
+    .nav-links{display:none;}
+    .hero{padding:100px 24px 60px;}
+    .section{padding:60px 24px;}
+    .book-hero{grid-template-columns:1fr;gap:32px;}
+    .book-cover-large{max-width:200px;}
+    .book-meta h1{font-size:1.8rem;}
+    .fanart-grid{grid-template-columns:repeat(2,1fr);}
+    .book-detail-content{padding:80px 24px 60px;}
+    .recs-grid{padding:40px 24px 60px;}
+    .quiz-container{padding:40px 24px;}
+  }
+
+  /* Loading screen */
+  #loading{
+    position:fixed;inset:0;z-index:9000;
+    background:var(--void);
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:24px;
+    transition:opacity 0.6s;
+  }
+  #loading.hidden{opacity:0;pointer-events:none;}
+  .loading-title{
+    font-family:'Cinzel Decorative',serif;
+    font-size:2.5rem;color:var(--ember);
+    text-shadow:0 0 40px rgba(200,132,42,0.4);
+    animation:loadGlow 2s ease-in-out infinite;
+  }
+  @keyframes loadGlow{0%,100%{text-shadow:0 0 20px rgba(200,132,42,0.3)}50%{text-shadow:0 0 60px rgba(200,132,42,0.7)}}
+  .loading-bar{
+    width:200px;height:2px;background:rgba(203,190,232,0.1);overflow:hidden;
+  }
+  .loading-bar-fill{
+    height:100%;background:linear-gradient(to right,var(--arcane),var(--ember));
+    animation:loadBar 1.5s ease-in-out forwards;
+  }
+  @keyframes loadBar{from{width:0}to{width:100%}}
+  .loading-sub{
+    font-family:'EB Garamond',serif;font-style:italic;
+    font-size:1rem;color:var(--wisp);opacity:0.5;
+  }
+
+  /* Book card generated covers */
+  .gen-cover{
+    width:100%;aspect-ratio:2/3;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:flex-end;
+    padding:16px;position:relative;overflow:hidden;
+  }
+  .gen-cover-title{
+    font-family:'Cinzel',serif;font-size:0.8rem;
+    text-align:center;color:#fff;
+    text-shadow:0 2px 8px rgba(0,0,0,0.8);
+    z-index:1;position:relative;line-height:1.3;
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Loading Screen -->
+<div id="loading">
+  <div class="loading-title">Grimoire</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+  <div class="loading-sub">Opening the book of books...</div>
+</div>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">✦ Grimoire</div>
+  <div class="nav-links">
+    <span class="nav-link" onclick="showPage('home')">Discover</span>
+    <span class="nav-link" onclick="showPage('quiz')">Find My Books</span>
+    <span class="nav-link" onclick="showPage('home')">Library</span>
+    <span class="nav-link" onclick="showPage('home')">Community</span>
+  </div>
+  <button class="nav-btn" onclick="showPage('quiz')">Start Reading →</button>
+</nav>
+
+<!-- AI Chat Widget -->
+<div id="ai-chat">
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <span class="chat-header-icon">🔮</span>
+      <div>
+        <div class="chat-header-title">The Oracle</div>
+        <div class="chat-header-sub">AI Book Companion</div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg ai">Welcome, seeker. I am the Oracle — your guide through a thousand worlds. Tell me what stirs your soul, and I will find your next obsession. 📖✨</div>
+    </div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chatInput" placeholder="Ask me anything about books..." rows="1" onkeydown="chatKeydown(event)"></textarea>
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+  <button class="chat-bubble" onclick="toggleChat()">🔮</button>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close">✕</button>
+  <img src="" id="lightboxImg" alt="">
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- HOME PAGE -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="home" class="page active">
+  <div class="hero">
+    <div class="stars" id="stars"></div>
+    <!-- Atmospheric orbs -->
+    <div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(123,91,181,0.18),transparent);top:-100px;left:-100px;--d:25s;--tx:40px;--ty:-20px;"></div>
+    <div class="orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(200,132,42,0.12),transparent);bottom:0;right:-50px;--d:18s;--tx:-30px;--ty:20px;"></div>
+    <div class="orb" style="width:300px;height:300px;background:radial-gradient(circle,rgba(61,50,85,0.3),transparent);top:50%;left:50%;--d:22s;--tx:-20px;--ty:-30px;"></div>
+
+    <div class="hero-eyebrow">Your next obsession awaits</div>
+    <h1 class="hero-title">Every Story<br>Leaves a <span>Mark</span></h1>
+    <p class="hero-sub">Discover books that haunt you long after the last page. Curated by readers, guided by mystery.</p>
+    <div class="hero-cta-group">
+      <button class="btn-primary" onclick="showPage('quiz')">Find My Books</button>
+      <button class="btn-secondary" onclick="document.querySelector('.section').scrollIntoView({behavior:'smooth'})">Browse Trending</button>
+    </div>
+    <div class="scroll-ind">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </div>
+
+  <!-- Marquee -->
+  <div class="marquee-section">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
+
+  <!-- Trending Books -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title"><span>✦</span> Trending in the Dark</h2>
+      <span class="see-all" onclick="showPage('recommendations')">See all →</span>
+    </div>
+    <div class="book-grid" id="trendingGrid"></div>
+  </div>
+
+  <!-- Genres -->
+  <div class="section" style="padding-top:0">
+    <div class="section-header">
+      <h2 class="section-title"><span>✦</span> Explore by Realm</h2>
+    </div>
+    <div class="genre-grid" id="genreGrid"></div>
+  </div>
+
+  <!-- Stats banner -->
+  <div style="padding:60px 48px;background:rgba(37,30,53,0.3);border-top:1px solid rgba(203,190,232,0.05);display:flex;justify-content:space-around;flex-wrap:wrap;gap:32px;">
+    <div style="text-align:center;">
+      <div style="font-family:'Cinzel Decorative',serif;font-size:2.5rem;color:var(--ember);">2.4M</div>
+      <div style="font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--wisp);opacity:0.6;margin-top:6px;">Books Catalogued</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:'Cinzel Decorative',serif;font-size:2.5rem;color:var(--ember);">847K</div>
+      <div style="font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--wisp);opacity:0.6;margin-top:6px;">Readers</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:'Cinzel Decorative',serif;font-size:2.5rem;color:var(--ember);">5.1M</div>
+      <div style="font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--wisp);opacity:0.6;margin-top:6px;">Reviews Written</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:'Cinzel Decorative',serif;font-size:2.5rem;color:var(--ember);">12K</div>
+      <div style="font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--wisp);opacity:0.6;margin-top:6px;">Reading Clubs</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- QUIZ / PREFERENCES PAGE -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="quiz" class="page">
+  <div style="min-height:100vh;background:radial-gradient(ellipse at 30% 40%,rgba(61,50,85,0.5) 0%,var(--void) 65%);">
+  <div class="quiz-container">
+    <div class="quiz-header">
+      <div class="quiz-step-indicator" id="stepIndicator"></div>
+      <h1 class="quiz-title">Your Reading Ritual</h1>
+      <p class="quiz-subtitle">Tell the grimoire your literary soul, and it shall divine your perfect reads</p>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:25%"></div>
+    </div>
+
+    <!-- Step 1: Favourite books -->
+    <div class="form-step active" id="step1">
+      <div class="form-group">
+        <label class="form-label">Books you have loved</label>
+        <input class="form-input" type="text" id="favBooks" placeholder="e.g. Fourth Wing, A Court of Thorns and Roses, The Night Circus...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Favourite authors</label>
+        <input class="form-input" type="text" id="favAuthors" placeholder="e.g. Rebecca Yarros, Sarah J. Maas, Erin Morgenstern...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">A book series you adored</label>
+        <input class="form-input" type="text" id="favSeries" placeholder="e.g. The Stormlight Archive, Wheel of Time...">
+      </div>
+    </div>
+
+    <!-- Step 2: Genres -->
+    <div class="form-step" id="step2">
+      <div class="form-group">
+        <label class="form-label">Genres that call to you (select all that apply)</label>
+        <div class="tag-grid" id="genreTags">
+          <div class="tag-option selected" data-val="Fantasy">🐉 Fantasy</div>
+          <div class="tag-option" data-val="Dark Romance">🖤 Dark Romance</div>
+          <div class="tag-option selected" data-val="Romantasy">✨ Romantasy</div>
+          <div class="tag-option" data-val="Sci-Fi">🚀 Sci-Fi</div>
+          <div class="tag-option" data-val="Horror">👁 Horror</div>
+          <div class="tag-option" data-val="Mystery">🔍 Mystery</div>
+          <div class="tag-option" data-val="Thriller">⚡ Thriller</div>
+          <div class="tag-option" data-val="Historical Fiction">⚔️ Historical Fiction</div>
+          <div class="tag-option" data-val="Literary Fiction">📜 Literary Fiction</div>
+          <div class="tag-option" data-val="Gothic">🕯 Gothic</div>
+          <div class="tag-option" data-val="YA">🌙 YA</div>
+          <div class="tag-option" data-val="Mythology">🌿 Mythology</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Themes you crave (select all that apply)</label>
+        <div class="tag-grid" id="themeTags">
+          <div class="tag-option selected" data-val="enemies-to-lovers">Enemies to Lovers</div>
+          <div class="tag-option" data-val="chosen-one">Chosen One</div>
+          <div class="tag-option selected" data-val="found-family">Found Family</div>
+          <div class="tag-option" data-val="slow-burn">Slow Burn</div>
+          <div class="tag-option" data-val="morally-grey">Morally Grey Characters</div>
+          <div class="tag-option" data-val="magic-system">Intricate Magic Systems</div>
+          <div class="tag-option" data-val="political-intrigue">Political Intrigue</div>
+          <div class="tag-option" data-val="second-chance">Second Chance</div>
+          <div class="tag-option" data-val="mystery-romance">Mystery Romance</div>
+          <div class="tag-option" data-val="survival">Survival</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Reading preferences -->
+    <div class="form-step" id="step3">
+      <div class="form-group">
+        <label class="form-label">How much romance would you like?</label>
+        <div class="range-group">
+          <input type="range" min="0" max="100" value="60" id="romanceSlider">
+          <div class="range-labels">
+            <span class="range-label">None</span>
+            <span class="range-label">Spicy 🔥</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Series or standalone?</label>
+        <div class="tag-grid">
+          <div class="tag-option selected" data-group="series" data-val="series">Lengthy Series</div>
+          <div class="tag-option" data-group="series" data-val="trilogy">Trilogy</div>
+          <div class="tag-option" data-group="series" data-val="standalone">Standalone</div>
+          <div class="tag-option" data-group="series" data-val="any">Any</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preferred page count</label>
+        <div class="range-group">
+          <input type="range" min="100" max="1200" value="450" step="50" id="pageSlider">
+          <div class="range-labels">
+            <span class="range-label">Short (100)</span>
+            <span class="range-label" id="pageVal">450 pages</span>
+            <span class="range-label">Epic (1200)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Mood & vibe -->
+    <div class="form-step" id="step4">
+      <div class="form-group">
+        <label class="form-label">Current reading mood</label>
+        <div class="tag-grid">
+          <div class="tag-option selected" data-val="escapism">Pure Escapism</div>
+          <div class="tag-option" data-val="emotional">Emotionally Devastating</div>
+          <div class="tag-option" data-val="light">Feel-Good & Light</div>
+          <div class="tag-option" data-val="dark">Deliciously Dark</div>
+          <div class="tag-option" data-val="intellectual">Intellectually Stimulating</div>
+          <div class="tag-option" data-val="action">Non-stop Action</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Books you did NOT enjoy (so we can avoid)</label>
+        <textarea class="form-textarea" id="disliked" placeholder="e.g. Twilight, 50 Shades — anything you want to avoid..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Any content you want to avoid?</label>
+        <div class="tag-grid">
+          <div class="tag-option" data-val="violence">Graphic Violence</div>
+          <div class="tag-option" data-val="explicit">Explicit Content</div>
+          <div class="tag-option" data-val="tragedy">Tragic Endings</div>
+          <div class="tag-option" data-val="cliffhangers">Unresolved Cliffhangers</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn-secondary" id="prevBtn" onclick="changeStep(-1)" style="display:none">← Previous</button>
+      <button class="btn-primary" id="nextBtn" onclick="changeStep(1)">Continue →</button>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- RECOMMENDATIONS PAGE -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="recommendations" class="page">
+  <div style="background:radial-gradient(ellipse at 70% 20%,rgba(61,50,85,0.4) 0%,var(--void) 60%);min-height:100vh;">
+  <div class="recs-header">
+    <h1 class="recs-title">Your Destined Reads</h1>
+    <p class="recs-subtitle">The grimoire has divined these books for your soul</p>
+  </div>
+  <div class="recs-grid" id="recsGrid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- BOOK DETAIL PAGE (overlay) -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="book-detail">
+  <canvas id="book-particles"></canvas>
+  <div class="book-bg" id="bookBg">
+    <div class="book-bg-layer1" id="bookBgLayer1"></div>
+    <div class="book-bg-layer2"></div>
+  </div>
+  <div class="book-detail-content">
+    <button class="back-btn" id="backBtn">← Return</button>
+    <div class="book-hero">
+      <div>
+        <div class="book-cover-large" id="detailCoverWrap">
+          <img src="" id="detailCoverImg" alt="">
+        </div>
+        <div style="margin-top:20px;">
+          <div class="rating-widget">
+            <div class="rating-title">Your Rating</div>
+            <div class="stars-row" id="starRow">
+              <span class="star-btn" data-star="1">★</span>
+              <span class="star-btn" data-star="2">★</span>
+              <span class="star-btn" data-star="3">★</span>
+              <span class="star-btn" data-star="4">★</span>
+              <span class="star-btn" data-star="5">★</span>
+            </div>
+            <div class="status-row">
+              <button class="status-btn" data-status="want">Want to Read</button>
+              <button class="status-btn" data-status="reading">Reading</button>
+              <button class="status-btn active" data-status="finished">Finished</button>
+              <button class="status-btn" data-status="dnf">Did Not Finish</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="book-meta">
+        <div class="book-tags" id="bookTags"></div>
+        <h1 id="detailTitle"></h1>
+        <div class="author-name" id="detailAuthor"></div>
+        <p class="book-synopsis" id="detailSynopsis"></p>
+        <div style="display:flex;gap:24px;margin-bottom:16px;">
+          <div>
+            <div style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ember);margin-bottom:4px;">Rating</div>
+            <div style="font-size:1.1rem;" id="detailRating"></div>
+          </div>
+          <div>
+            <div style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ember);margin-bottom:4px;">Pages</div>
+            <div style="font-size:1.1rem;" id="detailPages"></div>
+          </div>
+          <div>
+            <div style="font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ember);margin-bottom:4px;">Published</div>
+            <div style="font-size:1.1rem;" id="detailYear"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="detail-tabs">
+      <button class="tab-btn active" onclick="switchTab('playlist')">Playlist</button>
+      <button class="tab-btn" onclick="switchTab('fanart')">Fanart</button>
+      <button class="tab-btn" onclick="switchTab('community')">Community</button>
+    </div>
+
+    <div class="tab-content active" id="tab-playlist">
+      <div class="playlist" id="playlistContainer"></div>
+    </div>
+    <div class="tab-content" id="tab-fanart">
+      <p style="font-family:'EB Garamond',serif;font-style:italic;color:var(--wisp);opacity:0.6;margin-bottom:20px;">Fan-created art from the community. Images sourced from public archives.</p>
+      <div class="fanart-grid" id="fanartGrid"></div>
+    </div>
+    <div class="tab-content" id="tab-community">
+      <div class="comments-section">
+        <div class="comment-form">
+          <textarea class="comment-input" id="commentInput" placeholder="Share your thoughts on this book..."></textarea>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:8px;">
+            <div style="display:flex;gap:4px;" id="commentStars">
+              <span style="font-size:1.2rem;cursor:pointer;color:rgba(203,190,232,0.3);" class="cstar" data-s="1">★</span>
+              <span style="font-size:1.2rem;cursor:pointer;color:rgba(203,190,232,0.3);" class="cstar" data-s="2">★</span>
+              <span style="font-size:1.2rem;cursor:pointer;color:rgba(203,190,232,0.3);" class="cstar" data-s="3">★</span>
+              <span style="font-size:1.2rem;cursor:pointer;color:rgba(203,190,232,0.3);" class="cstar" data-s="4">★</span>
+              <span style="font-size:1.2rem;cursor:pointer;color:rgba(203,190,232,0.3);" class="cstar" data-s="5">★</span>
+            </div>
+            <button class="comment-submit" onclick="submitComment()">Post Reflection</button>
+          </div>
+        </div>
+        <div class="comment-list" id="commentList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const BOOKS = [
+  {
+    id:1,title:"Fourth Wing",author:"Rebecca Yarros",year:2023,pages:517,
+    rating:4.6,genres:["Romantasy","Fantasy","Dark Romance"],
+    synopsis:"Violet Sorrengail was supposed to enter the Scribe Quadrant, but her mother—the commanding general—forces her into the Rider Quadrant to become a dragon rider at Basgiath War College. The dragons are as deadly as the riders, but it's one in particular—the warlord's son, Xaden Riorson—who may prove the most dangerous.",
+    cover:"https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1681786788i/61431922.jpg",
+    theme:{
+      gradient:"linear-gradient(160deg,#1a0a05 0%,#3d1500 40%,#0a0508 100%)",
+      particles:"fire",
+      accent:"#c8400a",
+      keyword:"dragon"
+    },
+    playlist:{
+      name:"Fourth Wing — Dragon Rider's Fate",
+      tracks:[
+        {title:"Demons",artist:"Imagine Dragons",duration:"2:57",art:"🎵"},
+        {title:"Through the Fire and Flames",artist:"DragonForce",duration:"7:22",art:"🎵"},
+        {title:"Fire",artist:"Barns Courtney",duration:"3:38",art:"🎵"},
+        {title:"War of Hearts",artist:"Ruelle",duration:"3:30",art:"🎵"},
+        {title:"River",artist:"Bishop Briggs",duration:"3:21",art:"🎵"},
+        {title:"Throne",artist:"Bring Me the Horizon",duration:"3:41",art:"🎵"},
+      ]
+    },
+    fanart:["dragon","rider","magic","fantasy wings","dark fantasy art"],
+    comments:[
+      {user:"VioletRider",avatar:"V",stars:5,date:"2 weeks ago",text:"Rebecca Yarros created an absolute masterpiece. Xaden Riorson is THE fictional man of my dreams. The dragon bond scenes had me completely breathless."},
+      {user:"DragonScribe",avatar:"D",stars:4,date:"1 month ago",text:"The magic system is intricate and beautiful. The college setting with dragon riders is so fresh and unique. A few slow moments in the middle but the ending absolutely devastates."},
+    ]
+  },
+  {
+    id:2,title:"A Court of Thorns and Roses",author:"Sarah J. Maas",year:2015,pages:419,
+    rating:4.3,genres:["Romantasy","Fantasy","Fae"],
+    synopsis:"Nineteen-year-old huntress Feyre, starving and desperate, kills a wolf in the woods — only to be taken to the magical lands of Prythian by a terrifying beast. As she learns to navigate the treacherous world of the Fae and uncover dark secrets, she finds herself drawn into a love that could destroy her.",
+    cover:"https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1620325671i/16096824.jpg",
+    theme:{
+      gradient:"linear-gradient(160deg,#050f1a 0%,#0a2515 40%,#05050f 100%)",
+      particles:"petals",
+      accent:"#2d8c4e",
+      keyword:"fae"
+    },
+    playlist:{
+      name:"ACOTAR — Under the Mountain",
+      tracks:[
+        {title:"Enchanted",artist:"Taylor Swift",duration:"5:52",art:"🎵"},
+        {title:"I Lived",artist:"OneRepublic",duration:"4:23",art:"🎵"},
+        {title:"In My Veins",artist:"Andrew Belle",duration:"3:40",art:"🎵"},
+        {title:"Monsters",artist:"Ruelle",duration:"2:22",art:"🎵"},
+        {title:"Make You Feel My Love",artist:"Adele",duration:"3:32",art:"🎵"},
+      ]
+    },
+    fanart:["fae fantasy art","court of thorns","feyre tamlin","spring court"],
+    comments:[
+      {user:"FeyreDarling",avatar:"F",stars:5,date:"3 days ago",text:"This series started it all for me. The world-building is extraordinary and the characters feel so real. Rhysand is the ultimate book boyfriend."},
+      {user:"MaasArmy",avatar:"M",stars:4,date:"2 weeks ago",text:"Beautiful fairy tale retelling with enough darkness and romance to keep you hooked for six books. Essential romantasy reading."},
+    ]
+  },
+  {
+    id:3,title:"The Night Circus",author:"Erin Morgenstern",year:2011,pages:387,
+    rating:4.4,genres:["Fantasy","Gothic","Historical Fiction"],
+    synopsis:"The circus arrives without warning. No announcements precede it, no paper notices plastered to lampposts and storefronts. It is simply there, when yesterday it was not. The black-and-white tents are set up in the night, a rivalry played out between two young magicians — Marco and Celia — who find themselves unable to help falling in love.",
+    cover:"https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1637630891i/9361589.jpg",
+    theme:{
+      gradient:"linear-gradient(160deg,#080808 0%,#1a1a1a 40%,#0d0808 100%)",
+      particles:"snow",
+      accent:"#f0f0f0",
+      keyword:"circus"
+    },
+    playlist:{
+      name:"Le Cirque des Rêves",
+      tracks:[
+        {title:"Clair de Lune",artist:"Debussy",duration:"4:44",art:"🎵"},
+        {title:"Waltz of the Snowflakes",artist:"Tchaikovsky",duration:"4:02",art:"🎵"},
+        {title:"Icarus",artist:"Bastille",duration:"4:15",art:"🎵"},
+        {title:"Come Little Children",artist:"Various",duration:"2:58",art:"🎵"},
+        {title:"Night Circus",artist:"Chad Lawson",duration:"3:22",art:"🎵"},
+      ]
+    },
+    fanart:["night circus art","black white tent circus","magical circus fantasy","Le Cirque des Reves"],
+    comments:[
+      {user:"CircusReader",avatar:"C",stars:5,date:"1 week ago",text:"The most atmospheric book I have ever read. Morgenstern writes in a way that feels like stepping into a dream. I read it twice back to back."},
+      {user:"TentSeeker",avatar:"T",stars:4,date:"3 weeks ago",text:"The prose is absolutely gorgeous. Some find the plot slow but the world-building is so immersive it doesn't matter. Pure magic."},
+    ]
+  },
+  {
+    id:4,title:"Throne of Glass",author:"Sarah J. Maas",year:2012,pages:404,
+    rating:4.2,genres:["Fantasy","YA","Dark Romance"],
+    synopsis:"After serving out a year of hard labor in the salt mines of Endovier for her crimes, eighteen-year-old assassin Celaena Sardothien is dragged before the Crown Prince of Adarlan. After she wins the competition to become the king's Champion, a series of mysterious deaths plunges her deeper into conspiracy and magic.",
+    cover:"https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1659310370i/7896527.jpg",
+    theme:{
+      gradient:"linear-gradient(160deg,#0a0805 0%,#1c1505 40%,#05080a 100%)",
+      particles:"sparks",
+      accent:"#c8a020",
+      keyword:"assassin"
+    },
+    playlist:{
+      name:"Throne of Glass — The Champion's Playlist",
+      tracks:[
+        {title:"Power",artist:"Isak Danielson",duration:"3:44",art:"🎵"},
+        {title:"Human",artist:"Rag'n'Bone Man",duration:"3:01",art:"🎵"},
+        {title:"Rise",artist:"Katy Perry",duration:"3:52",art:"🎵"},
+        {title:"Champion",artist:"Carrie Underwood",duration:"3:48",art:"🎵"},
+        {title:"Warrior",artist:"Ke$ha",duration:"3:46",art:"🎵"},
+      ]
+    },
+    fanart:["Celaena Sardothien","throne of glass","assassin fantasy","glass palace"],
+    comments:[
+      {user:"AssassinQueen",avatar:"A",stars:5,date:"5 days ago",text:"Celaena is the most compelling protagonist in fantasy. Her arc across 8 books is breathtaking. Start here and lose the next year of your life."},
+    ]
+  },
+  {
+    id:5,title:"The Name of the Wind",author:"Patrick Rothfuss",year:2007,pages:662,
+    rating:4.5,genres:["Fantasy","Epic Fantasy"],
+    synopsis:"Kvothe, now a legend, retreats to a small village under a false name. But when a chronicler seeks him out, Kvothe begins to tell the story of his life — of a child orphaned by the Chandrian, a student of arcane arts at the University, and a man who loved a woman beyond all reckoning.",
+    cover:"https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1270352123i/186074.jpg",
+    theme:{
+      gradient:"linear-gradient(160deg,#060a14 0%,#14200a 40%,#0a0608 100%)",
+      particles:"motes",
+      accent:"#4a6fa0",
+      keyword:"wind"
+    },
+    playlist:{
+      name:"The Kingkiller Chronicle",
+      tracks:[
+        {title:"The Sound of Silence",artist:"Disturbed",duration:"4:06",art:"🎵"},
+        {title:"The Wandering",artist:"Kevin MacLeod",duration:"3:10",art:"🎵"},
+        {title:"Mad World",artist:"Gary Jules",duration:"3:08",art:"🎵"},
+        {title:"Legend",artist:"The Score",duration:"3:34",art:"🎵"},
+      ]
+    },
+    fanart:["Kvothe red hair","Name of the Wind fantasy","The University KKC","sympathy magic"],
+    comments:[
+      {user:"ChronicleSeeker",avatar:"K",stars:5,date:"2 months ago",text:"The writing is possibly the most beautiful in fantasy. Kvothe's voice is utterly compelling. Yes, the wait for book 3 is agonising, but books 1 and 2 are worth it."},
+    ]
+  },
+  {
+    id:6,title:"Iron Flame",author:"Rebecca Yarros",year:2023,pages:623,
+    rating:4.5,genres:["Romantasy","Fantasy","Dark Romance"],
+    synopsis:"The sequel to Fourth Wing. The second year at Basgiath War College is more dangerous than the first, and the secrets Violet has uncovered could destroy everything—including her relationship with Xaden. As war looms, she must choose between love and a truth that could shatter the world.",
+    cover:"https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1693600346i/90202302.jpg",
+    theme:{
+      gradient:"linear-gradient(160deg,#0f0505 0%,#2a0a00 40%,#060305 100%)",
+      particles:"fire",
+      accent:"#d44000",
+      keyword:"dragon"
+    },
+    playlist:{
+      name:"Iron Flame — Ashes & Embers",
+      tracks:[
+        {title:"Death of Peace of Mind",artist:"Bad Omens",duration:"3:10",art:"🎵"},
+        {title:"Smells Like Teen Spirit",artist:"Nothing But Thieves",duration:"4:01",art:"🎵"},
+        {title:"King of Anything",artist:"Sara Bareilles",duration:"4:06",art:"🎵"},
+        {title:"Centuries",artist:"Fall Out Boy",duration:"3:43",art:"🎵"},
+      ]
+    },
+    fanart:["iron flame dragon","Xaden Riorson","Violet Sorrengail","wyvern fantasy"],
+    comments:[
+      {user:"XadenLoyalist",avatar:"X",stars:5,date:"1 week ago",text:"The ending. THE ENDING. I screamed. I sobbed. I immediately wanted to start over. Yarros outdoes herself at every turn."},
+    ]
+  },
+  {
+    id:7,title:"The Atlas Six",author:"Olivie Blake",year:2020,pages:354,
+    rating:4.0,genres:["Dark Fantasy","Horror","Mystery"],
+    synopsis:"Six uniquely gifted magicians are invited to be considered for membership in the Alexandrian Society, whose custodians guard lost knowledge from the greatest civilizations of antiquity. But only five will be initiated, and one will be eliminated — their methods entirely at the Society's discretion.",
+    cover:"https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1623001314i/57890863.jpg",
+    theme:{
+      gradient:"linear-gradient(160deg,#08060f 0%,#100820 40%,#060408 100%)",
+      particles:"motes",
+      accent:"#7b5bb5",
+      keyword:"magic"
+    },
+    playlist:{
+      name:"The Atlas Six — Six Ambitions",
+      tracks:[
+        {title:"Everybody Wants to Rule the World",artist:"Lorde",duration:"4:06",art:"🎵"},
+        {title:"Seven Nation Army",artist:"The White Stripes",duration:"3:51",art:"🎵"},
+        {title:"Genius",artist:"LSD",duration:"3:36",art:"🎵"},
+        {title:"Villain",artist:"K/DA",duration:"3:12",art:"🎵"},
+      ]
+    },
+    fanart:["Atlas Six magic","dark academic aesthetic","morally grey characters","Alexandrian Library"],
+    comments:[
+      {user:"MorallyGrey",avatar:"M",stars:4,date:"3 weeks ago",text:"Dark academia at its most stylish and morally complex. All six characters are fascinating disasters. The dialogue is razor-sharp."},
+    ]
+  },
+  {
+    id:8,title:"Caraval",author:"Stephanie Garber",year:2017,pages:407,
+    rating:4.1,genres:["Fantasy","YA","Mystery"],
+    synopsis:"Scarlett Dragna and her sister Donatella have dreamt of attending Caraval—a once-a-year performance where the audience participates in the show. But when Legend, the mastermind behind Caraval, lures them into the performance itself, the stakes become terrifyingly real.",
+    cover:"https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1478107000i/27883214.jpg",
+    theme:{
+      gradient:"linear-gradient(160deg,#0f0808 0%,#200a18 40%,#0a0808 100%)",
+      particles:"petals",
+      accent:"#c04090",
+      keyword:"circus"
+    },
+    playlist:{
+      name:"Caraval — Whatever You've Heard, It's More",
+      tracks:[
+        {title:"Game of Survival",artist:"Ruelle",duration:"3:44",art:"🎵"},
+        {title:"Glitter & Gold",artist:"Barns Courtney",duration:"3:09",art:"🎵"},
+        {title:"Teeth",artist:"5 Seconds of Summer",duration:"3:18",art:"🎵"},
+        {title:"Viva La Vida",artist:"Coldplay",duration:"4:01",art:"🎵"},
+      ]
+    },
+    fanart:["Caraval book art","magical carnival","Legend Caraval","masquerade fantasy"],
+    comments:[
+      {user:"CaravalDreamer",avatar:"C",stars:4,date:"1 month ago",text:"Utterly enchanting. The world feels like a fever dream you never want to wake from. Perfect for fans of The Night Circus."},
+    ]
+  }
+];
+
+const GENRES_DATA = [
+  {name:"Romantasy",icon:"⚔️",gradient:"linear-gradient(135deg,#8b1a4a,#c8842a)"},
+  {name:"Dark Fantasy",icon:"🐉",gradient:"linear-gradient(135deg,#1a1a6b,#6b1a1a)"},
+  {name:"Gothic Horror",icon:"🦇",gradient:"linear-gradient(135deg,#1a0a2a,#2a1a0a)"},
+  {name:"Sci-Fi",icon:"🚀",gradient:"linear-gradient(135deg,#0a2a4a,#0a4a2a)"},
+  {name:"Mystery",icon:"🔍",gradient:"linear-gradient(135deg,#1a1a1a,#4a3a1a)"},
+  {name:"Historical",icon:"📜",gradient:"linear-gradient(135deg,#2a1a0a,#1a2a0a)"},
+  {name:"Literary",icon:"🪶",gradient:"linear-gradient(135deg,#0a1a2a,#1a0a2a)"},
+  {name:"Mythology",icon:"🌿",gradient:"linear-gradient(135deg,#0a2a1a,#2a0a0a)"},
+];
+
+const MARQUEE_TITLES = ["Fourth Wing","ACOTAR","The Night Circus","Mistborn","Throne of Glass","Iron Flame","The Atlas Six","Caraval","The Priory of the Orange Tree","House of Salt and Sorrows","Strange the Dreamer","An Ember in the Ashes","Children of Blood and Bone","Serpent & Dove","From Blood and Ash"];
+
+// AI responses
+const AI_RESPONSES = [
+  (q)=>`Based on what you've shared, I sense you'd be drawn to *${BOOKS[Math.floor(Math.random()*BOOKS.length)].title}*. The combination of magic and emotional intensity matches the energy you're describing perfectly.`,
+  (q)=>`Hmm, intriguing... Given your taste, I'd suggest exploring Rebecca Yarros' work. Her *Fourth Wing* series weaves romance and fantasy in a way that tends to captivate readers who love your described preferences. Dragons, rivals-to-lovers, and a richly built world.`,
+  (q)=>`The stars align toward Gothic Fantasy for you. *The Night Circus* by Erin Morgenstern would enchant you — it's atmospheric, romantic, and completely transportive. Every page feels like a magic trick.`,
+  (q)=>`For what you're describing, I'd point you toward Sarah J. Maas — her *A Court of Thorns and Roses* series is the quintessential romantasy. Alternatively, *The Atlas Six* if you want morally grey characters and dark academia vibes.`,
+  (q)=>`Your reading soul calls for *The Name of the Wind* — Patrick Rothfuss writes with a lyrical precision that is unlike any other fantasy author. The protagonist Kvothe is one of literature's most compelling characters.`,
+  (q)=>`I see deep romantasy energy in your preferences. *Iron Flame* (the sequel to Fourth Wing) will absolutely destroy you in the best possible way. Have tissues ready for the ending.`,
+];
+
+let aiResponseIdx = 0;
+
+// ═══════════════════════════════════════
+// CURSOR
+// ═══════════════════════════════════════
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+document.addEventListener('mousemove',e=>{
+  cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';
+  setTimeout(()=>{ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px';},80);
+});
+
+// ═══════════════════════════════════════
+// PAGE NAVIGATION
+// ═══════════════════════════════════════
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>{p.classList.remove('active');p.style.display='none';});
+  const p=document.getElementById(id);
+  p.style.display='block';
+  requestAnimationFrame(()=>p.classList.add('active'));
+  window.scrollTo(0,0);
+  if(id==='recommendations') renderRecs();
+}
+
+// ═══════════════════════════════════════
+// LOADING
+// ═══════════════════════════════════════
+window.addEventListener('load',()=>{
+  initStars(); buildMarquee(); buildTrending(); buildGenres(); buildStepDots();
+  setTimeout(()=>{
+    document.getElementById('loading').classList.add('hidden');
+    setTimeout(()=>document.getElementById('loading').style.display='none',700);
+  },1800);
+});
+
+// ═══════════════════════════════════════
+// STARS BACKGROUND
+// ═══════════════════════════════════════
+function initStars(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<120;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const size=Math.random()*2.5+0.5;
+    s.style.cssText=`width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*5}s;animation-delay:${Math.random()*5}s;`;
+    c.appendChild(s);
+  }
+}
+
+// ═══════════════════════════════════════
+// MARQUEE
+// ═══════════════════════════════════════
+function buildMarquee(){
+  const t=document.getElementById('marqueeTrack');
+  const titles=[...MARQUEE_TITLES,...MARQUEE_TITLES];
+  t.innerHTML=titles.map(tt=>`<div class="marquee-item">${tt}</div>`).join('');
+}
+
+// ═══════════════════════════════════════
+// TRENDING GRID
+// ═══════════════════════════════════════
+function buildTrending(){
+  const g=document.getElementById('trendingGrid');
+  const starsHtml=(r)=>'★'.repeat(Math.round(r))+'☆'.repeat(5-Math.round(r));
+  g.innerHTML=BOOKS.map(b=>`
+    <div class="book-card" onclick="openBook(${b.id})">
+      <div class="book-cover">
+        <img class="book-cover-img" src="${b.cover}" alt="${b.title}" onerror="this.parentNode.innerHTML='<div class=gen-cover style=background:${encodeURIComponent(b.theme.gradient)}>'+
+        '<div class=gen-cover-title>${b.title}</div></div>'">
+        <div class="book-cover-overlay">
+          <div class="cover-view-btn">View Book</div>
+        </div>
+      </div>
+      <div class="book-info">
+        <div class="book-title-sm">${b.title}</div>
+        <div class="book-author-sm">${b.author}</div>
+        <div class="book-rating-sm">
+          <span class="star-sm">★</span>
+          <span class="rating-val">${b.rating}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+
+const ALL_BOOKS = [...BOOKS];
+
+function generateAdditionalBooks(startId = 100, count = 150) {
+  const genres = ["Romantasy","Fantasy","Dark Romance","Academy","Fae","Vampire","Mythology","Paranormal","Historical Fantasy","Adventure"];
+  const books = [];
+  for (let i = 0; i < count; i++) {
+    books.push({
+      id: startId + i,
+      title: `Featured Book ${startId + i}`,
+      author: `Author ${startId + i}`,
+      year: 2010 + (i % 16),
+      pages: 300 + Math.floor(Math.random() * 400),
+      rating: +(3.8 + Math.random() * 1.2).toFixed(1),
+      country: "🌍 Global",
+      region: "global",
+      genres: [genres[Math.floor(Math.random() * genres.length)]],
+      synopsis: "An immersive story filled with mystery, romance, danger and unforgettable characters.",
+      cover: "https://via.placeholder.com/400x600?text=Book",
+      theories: [],
+      comments: []
+    });
+  }
+  return books;
+}
+const GENERATED_BOOKS = generateAdditionalBooks(100,150);
+ALL_BOOKS.push(...GENERATED_BOOKS);
+
+// ═══════════════════════════════════════
+// GENRE GRID
+// ═══════════════════════════════════════
+function buildGenres(){
+  const g=document.getElementById('genreGrid');
+  g.innerHTML=GENRES_DATA.map(genre=>`
+    <div class="genre-pill" style="--gradient:${genre.gradient}">
+      <div class="genre-icon">${genre.icon}</div>
+      <div class="genre-name">${genre.name}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+// FORM STEPS
+// ═══════════════════════════════════════
+let currentStep=1;const totalSteps=4;
+function buildStepDots(){
+  const ind=document.getElementById('stepIndicator');
+  ind.innerHTML=Array.from({length:totalSteps},(_,i)=>`<div class="step-dot ${i===0?'active':''}" id="dot${i+1}"></div>`).join('');
+}
+function changeStep(dir){
+  if(dir===1&&currentStep===totalSteps){
+    showPage('recommendations');return;
+  }
+  document.getElementById(`step${currentStep}`).classList.remove('active');
+  document.getElementById(`dot${currentStep}`).classList.remove('active');
+  document.getElementById(`dot${currentStep}`).classList.add('done');
+  currentStep=Math.max(1,Math.min(totalSteps,currentStep+dir));
+  document.getElementById(`step${currentStep}`).classList.add('active');
+  document.getElementById(`dot${currentStep}`).classList.add('active');
+  const pct=(currentStep/totalSteps)*100;
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('prevBtn').style.display=currentStep>1?'block':'none';
+  document.getElementById('nextBtn').textContent=currentStep===totalSteps?'Reveal My Books →':'Continue →';
+}
+// Tag toggle
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('tag-option')){
+    const grp=e.target.dataset.group;
+    if(grp){document.querySelectorAll(`[data-group="${grp}"]`).forEach(t=>t.classList.remove('selected'));}
+    e.target.classList.toggle('selected');
+  }
+  if(e.target.classList.contains('status-btn')){
+    document.querySelectorAll('.status-btn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    showToast('Reading status updated');
+  }
+});
+// Page slider
+document.getElementById('pageSlider')?.addEventListener('input',function(){
+  document.getElementById('pageVal').textContent=this.value+' pages';
+});
+
+// ═══════════════════════════════════════
+// RECOMMENDATIONS
+// ═══════════════════════════════════════
+function renderRecs(){
+  const g=document.getElementById('recsGrid');
+  const shuffled=[...ALL_BOOKS].sort(()=>Math.random()-0.5);
+  g.innerHTML=shuffled.map((b,i)=>`
+    <div class="rec-card" style="--delay:${i*0.07}s" onclick="openBook(${b.id})">
+      <div class="rec-match">${Math.floor(85+Math.random()*14)}% match</div>
+      <img class="rec-cover" src="${b.cover}" alt="${b.title}" 
+        onerror="this.style.display='none'">
+      <div class="rec-info">
+        <div class="book-title-sm">${b.title}</div>
+        <div class="book-author-sm">${b.author}</div>
+        <div class="book-rating-sm"><span class="star-sm">★</span><span class="rating-val">${b.rating}</span></div>
+        <div class="rec-why">✦ ${getReason(b)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+function getReason(b){
+  const reasons=[
+    `Matches your love of ${b.genres[0]}`,
+    `Readers who love Sarah J. Maas adore this`,
+    `Perfect for slow-burn romance fans`,
+    `Matches your dark fantasy taste`,
+    `Chosen for your mood board`,
+    `Similar atmosphere to your favourites`,
+  ];
+  return reasons[b.id%reasons.length];
+}
+
+// ═══════════════════════════════════════
+// BOOK DETAIL
+// ═══════════════════════════════════════
+let currentBook=null;let particleAnim=null;let commentStarRating=0;
+
+function openBook(id){
+  const book=BOOKS.find(b=>b.id===id);
+  if(!book)return;
+  currentBook=book;
+  // Populate fields
+  document.getElementById('detailTitle').textContent=book.title;
+  document.getElementById('detailAuthor').textContent='by '+book.author;
+  document.getElementById('detailSynopsis').textContent=book.synopsis;
+  document.getElementById('detailRating').textContent='★ '+book.rating;
+  document.getElementById('detailPages').textContent=book.pages;
+  document.getElementById('detailYear').textContent=book.year;
+  document.getElementById('detailCoverImg').src=book.cover;
+  document.getElementById('detailCoverImg').onerror=()=>{document.getElementById('detailCoverImg').src='';};
+  // Tags
+  document.getElementById('bookTags').innerHTML=book.genres.map(g=>`<span class="book-tag">${g}</span>`).join('');
+  // Background
+  document.getElementById('bookBgLayer1').style.background=book.theme.gradient;
+  document.body.style.setProperty('--book-accent',book.theme.accent);
+  // Playlist
+  buildPlaylist(book);
+  // Fanart - use colored placeholder divs
+  buildFanart(book);
+  // Comments
+  buildComments(book);
+  // Back button
+  document.getElementById('backBtn').onclick=()=>closeBook();
+  // Show page
+  const detail=document.getElementById('book-detail');
+  detail.style.display='block';
+  requestAnimationFrame(()=>detail.classList.add('active'));
+  document.body.style.overflow='hidden';
+  // Particles
+  startParticles(book.theme.particles,book.theme.accent);
+  // Reset tabs
+  switchTab('playlist');
+  // Reset stars
+  document.querySelectorAll('.star-btn').forEach(s=>s.classList.remove('active','hover'));
+  window.scrollTo(0,0);
+}
+
+function closeBook(){
+  const detail=document.getElementById('book-detail');
+  detail.classList.remove('active');
+  setTimeout(()=>detail.style.display='none',300);
+  document.body.style.overflow='';
+  if(particleAnim){cancelAnimationFrame(particleAnim);particleAnim=null;}
+}
+
+function buildPlaylist(book){
+  const p=book.playlist;
+  document.getElementById('playlistContainer').innerHTML=`
+    <div class="playlist-header">
+      <div class="spotify-icon">🎵</div>
+      <div>
+        <div class="playlist-name">${p.name}</div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:0.72rem;color:var(--wisp);opacity:0.5;">Inspired by the book · ${p.tracks.length} tracks</div>
+      </div>
+      <a href="https://open.spotify.com/search/${encodeURIComponent(p.name)}" target="_blank" style="margin-left:auto;font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:#1DB954;text-decoration:none;border:1px solid #1DB954;padding:6px 14px;transition:background 0.2s;" onmouseover="this.style.background='rgba(29,185,84,0.15)'" onmouseout="this.style.background='transparent'">Open in Spotify ↗</a>
+    </div>
+    <div class="track-list">
+      ${p.tracks.map((t,i)=>`
+        <div class="track" onclick="showToast('♫ Playing: ${t.title}')">
+          <div class="track-num">${i+1}</div>
+          <div class="track-art" style="background:linear-gradient(135deg,var(--dusk),var(--shadow));display:flex;align-items:center;justify-content:center;font-size:1rem;">${t.art}</div>
+          <div class="track-info">
+            <div class="track-title">${t.title}</div>
+            <div class="track-artist">${t.artist}</div>
+          </div>
+          <div class="track-duration">${t.duration}</div>
+          <div class="play-icon">▶</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// Fanart with styled placeholders + search suggestion
+function buildFanart(book){
+  const searches=book.fanart;
+  const colors=[
+    ['#2a1a0a','#6b2a0a'],['#0a1a2a','#0a2a6b'],
+    ['#0a2a1a','#1a4a0a'],['#2a0a1a','#6b0a2a'],
+    ['#1a0a2a','#4a0a6b'],['#0a2a2a','#0a6b4a'],
+  ];
+  document.getElementById('fanartGrid').innerHTML=searches.map((q,i)=>{
+    const [c1,c2]=colors[i%colors.length];
+    return `
+      <div class="fanart-item" onclick="searchFanart('${q}')">
+        <div style="width:100%;height:100%;background:linear-gradient(135deg,${c1},${c2});display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;text-align:center;cursor:pointer;">
+          <div style="font-size:2rem;">🎨</div>
+          <div style="font-family:'Cinzel',serif;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--wisp);line-height:1.4;">${q}</div>
+          <div style="font-family:'DM Sans',sans-serif;font-size:0.65rem;color:var(--wisp);opacity:0.5;">Click to search fan art</div>
+        </div>
+        <div class="fanart-overlay">
+          <span class="fanart-credit">Search: ${q}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function searchFanart(query){
+  window.open(`https://www.google.com/search?q=${encodeURIComponent(query+' fan art')}&tbm=isch`,'_blank');
+}
+
+function buildComments(book){
+  document.getElementById('commentList').innerHTML=book.comments.map(c=>`
+    <div class="comment">
+      <div class="comment-header">
+        <div class="comment-avatar">${c.avatar}</div>
+        <div>
+          <div class="comment-user">${c.user}</div>
+          <div class="comment-date">${c.date}</div>
+        </div>
+        <div class="comment-stars" style="margin-left:auto;">${'★'.repeat(c.stars)}${'☆'.repeat(5-c.stars)}</div>
+      </div>
+      <div class="comment-body">${c.text}</div>
+    </div>
+  `).join('');
+
+  // Comment star interaction
+  document.querySelectorAll('.cstar').forEach(s=>{
+    s.addEventListener('click',()=>{
+      commentStarRating=parseInt(s.dataset.s);
+      document.querySelectorAll('.cstar').forEach((cs,i)=>{
+        cs.style.color=i<commentStarRating?'var(--ember)':'rgba(203,190,232,0.3)';
+      });
+    });
+  });
+}
+
+function submitComment(){
+  const input=document.getElementById('commentInput');
+  const text=input.value.trim();
+  if(!text)return;
+  const list=document.getElementById('commentList');
+  const div=document.createElement('div');
+  div.className='comment';
+  div.style.animation='fadeUp 0.4s ease';
+  div.innerHTML=`
+    <div class="comment-header">
+      <div class="comment-avatar" style="background:var(--ember);color:var(--ink);">Y</div>
+      <div>
+        <div class="comment-user">You</div>
+        <div class="comment-date">Just now</div>
+      </div>
+      <div class="comment-stars" style="margin-left:auto;">${'★'.repeat(commentStarRating||0)}${'☆'.repeat(5-(commentStarRating||0))}</div>
+    </div>
+    <div class="comment-body">${text}</div>
+  `;
+  list.prepend(div);
+  input.value='';commentStarRating=0;
+  document.querySelectorAll('.cstar').forEach(cs=>cs.style.color='rgba(203,190,232,0.3)');
+  showToast('Reflection posted');
+}
+
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',['playlist','fanart','community'][i]===name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c=>{
+    c.classList.toggle('active',c.id==='tab-'+name);
+  });
+}
+
+// ═══════════════════════════════════════
+// STAR RATING
+// ═══════════════════════════════════════
+document.querySelectorAll('.star-btn').forEach(btn=>{
+  btn.addEventListener('mouseenter',()=>{
+    const val=parseInt(btn.dataset.star);
+    document.querySelectorAll('.star-btn').forEach((s,i)=>{
+      s.classList.toggle('hover',i<val);
+    });
+  });
+  btn.addEventListener('click',()=>{
+    const val=parseInt(btn.dataset.star);
+    document.querySelectorAll('.star-btn').forEach((s,i)=>{
+      s.classList.remove('hover');
+      s.classList.toggle('active',i<val);
+    });
+    showToast(`Rated ${val} star${val>1?'s':''}  ✦`);
+  });
+});
+document.getElementById('starRow')?.addEventListener('mouseleave',()=>{
+  document.querySelectorAll('.star-btn.hover').forEach(s=>s.classList.remove('hover'));
+});
+
+// ═══════════════════════════════════════
+// PARTICLES
+// ═══════════════════════════════════════
+function startParticles(type,color){
+  if(particleAnim)cancelAnimationFrame(particleAnim);
+  const canvas=document.getElementById('book-particles');
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  
+  const hex=color||'#c8842a';
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  
+  let particles=[];
+  const N={fire:60,petals:50,snow:80,sparks:100,motes:70}[type]||50;
+  
+  function spawn(){
+    const p={x:Math.random()*canvas.width,y:canvas.height+10,
+      vx:(Math.random()-0.5)*1.5,vy:-(Math.random()*2+0.5),
+      life:1,decay:0.003+Math.random()*0.004,
+      size:Math.random()*4+2,
+      rotation:Math.random()*Math.PI*2,
+      rotSpeed:(Math.random()-0.5)*0.05,
+      wobble:Math.random()*Math.PI*2,wobbleSpeed:0.02+Math.random()*0.03,
+    };
+    if(type==='fire'){p.vy=-(Math.random()*3+1);p.decay=0.008+Math.random()*0.006;}
+    if(type==='snow'){p.vy=-(Math.random()*0.8+0.2);p.vx=(Math.random()-0.5)*0.5;}
+    if(type==='sparks'){p.size=Math.random()*2+1;p.vy=-(Math.random()*5+2);p.decay=0.015+Math.random()*0.01;}
+    if(type==='motes'){p.size=Math.random()*3+1;p.vy=-(Math.random()*0.6+0.1);}
+    return p;
+  }
+  for(let i=0;i<N;i++){const p=spawn();p.y=Math.random()*canvas.height;particles.push(p);}
+  
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // Spawn new
+    if(particles.length<N)particles.push(spawn());
+    particles=particles.filter(p=>{
+      p.life-=p.decay;p.x+=p.vx;p.y+=p.vy;
+      p.wobble+=p.wobbleSpeed;p.x+=Math.sin(p.wobble)*0.5;
+      p.rotation+=p.rotSpeed;
+      if(p.life<=0)return false;
+      const a=p.life*0.7;
+      if(type==='fire'){
+        const grad=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size*2);
+        grad.addColorStop(0,`rgba(255,200,50,${a})`);
+        grad.addColorStop(0.4,`rgba(${r},${g/2},0,${a*0.8})`);
+        grad.addColorStop(1,`rgba(${r},0,0,0)`);
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size*2,0,Math.PI*2);
+        ctx.fillStyle=grad;ctx.fill();
+      } else if(type==='petals'){
+        ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rotation);
+        ctx.beginPath();ctx.ellipse(0,0,p.size,p.size*2,0,0,Math.PI*2);
+        ctx.fillStyle=`rgba(${r},${g},${b},${a*0.6})`;ctx.fill();
+        ctx.restore();
+      } else if(type==='snow'){
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fillStyle=`rgba(240,235,255,${a*0.8})`;ctx.fill();
+      } else if(type==='sparks'){
+        ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx*3,p.y-p.vy*3);
+        ctx.strokeStyle=`rgba(${r},${g},${b},${a})`;ctx.lineWidth=p.size*0.5;ctx.stroke();
+      } else {
+        ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+        ctx.fillStyle=`rgba(${r},${g},${b},${a*0.5})`;ctx.fill();
+      }
+      return true;
+    });
+    particleAnim=requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+}
+
+// ═══════════════════════════════════════
+// AI CHAT
+// ═══════════════════════════════════════
+let chatOpen=false;
+function toggleChat(){
+  chatOpen=!chatOpen;
+  document.getElementById('chatWindow').classList.toggle('open',chatOpen);
+}
+function chatKeydown(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
+}
+async function sendChat(){
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  if(!text)return;
+  addChatMsg(text,'user');
+  input.value='';
+  
+  // Typing indicator
+  const typing=document.createElement('div');
+  typing.className='chat-msg typing';
+  typing.innerHTML='<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  document.getElementById('chatMessages').appendChild(typing);
+  scrollChat();
+  
+  // Try Anthropic API
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are the Oracle, a mysterious and elegant AI book companion for Grimoire — a dark, atmospheric book discovery platform. You help readers find their perfect books with passion, literary knowledge, and a touch of mysticism. Keep responses concise (2-4 sentences), evocative, and always recommend specific book titles with brief reasons. The book library includes: ${BOOKS.map(b=>b.title+' by '+b.author).join(', ')}. Speak with a slightly poetic, mysterious tone.`,
+        messages:[{role:'user',content:text}]
+      })
+    });
+    typing.remove();
+    if(res.ok){
+      const data=await res.json();
+      const reply=data.content.map(c=>c.text||'').join('');
+      addChatMsg(reply,'ai');
+    } else {
+      // Fallback
+      const reply=AI_RESPONSES[aiResponseIdx%AI_RESPONSES.length](text);
+      aiResponseIdx++;addChatMsg(reply,'ai');
+    }
+  }catch{
+    typing.remove();
+    const reply=AI_RESPONSES[aiResponseIdx%AI_RESPONSES.length](text);
+    aiResponseIdx++;addChatMsg(reply,'ai');
+  }
+}
+function addChatMsg(text,role){
+  const div=document.createElement('div');
+  div.className=`chat-msg ${role}`;
+  div.textContent=text;
+  document.getElementById('chatMessages').appendChild(div);
+  scrollChat();
+}
+function scrollChat(){
+  const m=document.getElementById('chatMessages');
+  m.scrollTop=m.scrollHeight;
+}
+
+// ═══════════════════════════════════════
+// LIGHTBOX
+// ═══════════════════════════════════════
+function openLightbox(src){
+  document.getElementById('lightboxImg').src=src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+let toastTimer;
+function showToast(msg){
+  clearTimeout(toastTimer);
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// Keyboard nav
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('lightbox').classList.contains('open')){closeLightbox();return;}
+    if(document.getElementById('book-detail').classList.contains('active')){closeBook();return;}
+  }
+});
+</script>
+</body>
+</html>
